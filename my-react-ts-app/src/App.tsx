@@ -83,8 +83,8 @@ class App extends React.Component<{ title: string }> {
   };
   
   addNewProfile = (profileData) => {
-  	this.setState(prevState => ({
-    	profiles: [...prevState.profiles, profileData],
+  	this.setState(state => ({
+    	profiles: [...this.state.profiles, profileData],
     }));
   };
   render() {
