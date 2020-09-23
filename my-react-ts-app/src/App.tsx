@@ -1,26 +1,31 @@
-import React, { Profiler } from "react";
+import React, { Profiler, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { render } from "@testing-library/react";
 import Axios from "axios";
 
-const testData = [
-  {
-    name: "Dan Abramov",
-    avatar_url: "https://avatars0.githubusercontent.com/u/810438?v=4",
-    company: "@facebook",
-  },
-  {
-    name: "Sophie Alpert",
-    avatar_url: "https://avatars2.githubusercontent.com/u/6820?v=4",
-    company: "Humu",
-  },
-  {
-    name: "Sebastian Markbåge",
-    avatar_url: "https://avatars2.githubusercontent.com/u/63648?v=4",
-    company: "Facebook",
-  },
-];
+
+
+
+//class Card extends React.Component<IRCardProps> {
+function Card (props){
+  
+    return (
+      <div className="github-profile">
+        <img src={props.avatar_url} />
+        <div className="info">
+          <div className="name">{props.name}</div>
+          <div className="company">{props.company}</div>
+        </div>
+      </div>
+    );
+
+}
+interface IRCardProps {
+  avatar_url?: string;
+  name?: string;
+  company?: string;
+}
 
 const CardList = (props) => (
   <div>
@@ -29,72 +34,43 @@ const CardList = (props) => (
     ))}
   </div>
 );
-interface IRCardProps {
-  avatar_url?: string;
-  name?: string;
-  company?: string;
-}
-class Card extends React.Component<IRCardProps> {
-  render() {
-    const profile = this.props;
-    return (
-      <div className="github-profile">
-        <img src={profile.avatar_url} />
-        <div className="info">
-          <div className="name">{profile.name}</div>
-          <div className="company">{profile.company}</div>
-        </div>
-      </div>
-    );
-  }
-}
 
-interface IRFormProps {
-  onSubmit?: Function;
-}
-class Form extends React.Component<IRFormProps> {
-
-  state = {userName : ""};
-  handleSubmit = async (event) => {
-  event.preventDefault();
-  const resp  = await Axios.get(`https://api.github.com/users/${this.state.userName}`);
-    this.props.onSubmit(resp.data);
+function Form (props){
+  /*state = {userName : ""};*/
+  const [userName, setUserName] = useState("");
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const resp  = await Axios.get(`https://api.github.com/users/${userName}`);
+      props.onSubmit(resp.data);
   };
-  render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Github username"
-          value = {this.state.userName}
-          onChange = {event => this.setState({userName: event.target.value})}
+          value = {userName}
+          onChange = {event => setUserName(event.target.value)}
           required
         />
         <button>Add Card</button>
       </form>
     );
-  }
+  
 }
 
-class App extends React.Component<{ title: string }> {
+function App (props)  {
 
-  state = {
-    profiles: [],
-  };
+  const [profiles, setProfiles] = useState([]);
+  const addNewProfile = (profileData) => {setProfiles(
+   [...profiles, profileData]
+  )};
+  return (
+    <div>
+      <div className="header">{props.title}</div>
+      <Form onSubmit={addNewProfile}/>
+      <CardList profiles={profiles} />
+    </div>
+  );
   
-  addNewProfile = (profileData) => {
-  	this.setState(state => ({
-    	profiles: [...this.state.profiles, profileData],
-    }));
-  };
-  render() {
-    return (
-      <div>
-        <div className="header">{this.props.title}</div>
-        <Form onSubmit={this.addNewProfile}/>
-        <CardList profiles={this.state.profiles} />
-      </div>
-    );
-  }
 }
 export default App;
